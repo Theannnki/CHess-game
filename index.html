@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Embedded Chess Game</title>
+  <style>
+    #board { width: 400px; }
+    #moves { margin-top: 10px; font-family: monospace; white-space: pre; }
+  </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css" />
+</head>
+<body>
+
+<div id="board"></div>
+<button id="prevBtn">Previous Move</button>
+<button id="nextBtn">Next Move</button>
+<div id="moves"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chess.js@1.0.0/chess.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+<script>
+  const pgn = `[Event "Opera Game"]
+[Site "Paris FRA"]
+[Date "1858.??.??"]
+[Round "?"]
+[White "Paul Morphy"]
+[Black "Duke Karl / Count Isouard"]
+[Result "1-0"]
+
+1. e4 e5 2. Nf3 d6 3. d4 Bg4 4. dxe5 Bxf3 5. Qxf3 dxe5 6. Bc4 Nf6
+7. Qb3 Qe7 8. Nc3 c6 9. Bg5 b5 10. Nxb5 cxb5 11. Bxb5+ Nbd7 12. O-O-O Rd8
+13. Rxd7 Rxd7 14. Rd1 Qe6 15. Bxd7+ Nxd7 16. Qb8+ Nxb8 17. Rd8# 1-0`;
+
+  const chess = new Chess();
+  chess.load_pgn(pgn);
+
+  const moves = chess.history({ verbose: true });
+  let currentMove = -1;
+
+  const board = Chessboard('board', {
+    position: 'start',
+    pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
+  });
+
+  function updateBoard() {
+    if (currentMove === -1) {
+      board.position('start');
+      document.getElementById('moves').textContent = "Start position";
+      return;
+    }
+    chess.reset();
+    for (let i = 0; i <= currentMove; i++) {
+      chess.move(moves[i]);
+    }
+    board.position(chess.fen());
+    document.getElementById('moves').textContent = `Move ${currentMove + 1}: ${moves[currentMove].san}`;
+  }
+
+  document.getElementById('prevBtn').addEventListener('click', () => {
+    if (currentMove > -1) currentMove--;
+    updateBoard();
+  });
+
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    if (currentMove < moves.length - 1) currentMove++;
+    updateBoard();
+  });
+
+  updateBoard();
+</script>
+
+</body>
+</html>
